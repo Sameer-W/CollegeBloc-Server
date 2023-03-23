@@ -3,41 +3,44 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, "Please provide a name"],
-    minLength: 3,
-    maxLength: 50,
-  },
-  email: {
-    type: String,
-    required: [true, "Please provide an email"],
-    unique: true,
-    validate: {
-      validator: validator.isEmail,
-      message: "Please provide valid email",
+const UserSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Please provide a name"],
+      minLength: 3,
+      maxLength: 50,
+    },
+    email: {
+      type: String,
+      required: [true, "Please provide an email"],
+      unique: true,
+      validate: {
+        validator: validator.isEmail,
+        message: "Please provide valid email",
+      },
+    },
+    password: {
+      type: String,
+      required: [true, "Please provide a password"],
+      minLength: 6,
+    },
+    role: {
+      type: String,
+      enum: ["college", "recruiter", "student"],
+      default: "student",
+    },
+
+    passwordToken: {
+      type: String,
+    },
+
+    passwordTokenExpirationDate: {
+      type: Date,
     },
   },
-  password: {
-    type: String,
-    required: [true, "Please provide a password"],
-    minLength: 6,
-  },
-  role: {
-    type: String,
-    enum: ["admin", "user"],
-    default: "user",
-  },
-
-  passwordToken: {
-    type: String,
-  },
-
-  passwordTokenExpirationDate: {
-    type: Date,
-  },
-});
+  { discriminatorKey: "__t" }
+);
 
 UserSchema.pre("save", async function () {
   if (!this.isModified("password")) return;

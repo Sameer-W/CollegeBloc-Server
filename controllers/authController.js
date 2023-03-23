@@ -13,7 +13,7 @@ const { sendResetPasswordEmail } = require("../utils/sendResetPasswordEmail");
 const register = async (req, res) => {
   const { email, password, name } = req.body;
   const isFirstUser = (await User.countDocuments({})) === 0;
-  const role = isFirstUser ? "admin" : "user";
+  const role = isFirstUser ? "college" : "student";
   const user = await User.create({ email, password, name, role });
   const tokenUser = createTokenUser(user);
 
@@ -21,6 +21,7 @@ const register = async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({ user: tokenUser });
 };
+
 const login = async (req, res) => {
   const { email, password } = req.body;
 
