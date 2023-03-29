@@ -1,10 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
 const { token } = require("morgan");
 const Recruiter = require("../models/Recruiter");
+const Student = require("../models/Student");
 
 const { createJWT, attachCookiesToResponse } = require("../utils");
 const createTokenUser = require("../utils/createTokenUser");
-const { sendResetPasswordEmail } = require("../utils/sendResetPasswordEmail");
 
 const registerRecruiter = async (req, res) => {
   const { email, password, name, location, description } = req.body;
@@ -47,4 +47,10 @@ const loginRecruiter = async (req, res) => {
   res.status(StatusCodes.OK).json({ user: tokenUser });
 };
 
-module.exports = { registerRecruiter, loginRecruiter };
+const getAllRecruiters = async (req, res) => {
+  const recruiters = await Recruiter.find({}).select("-password");
+
+  res.status(StatusCodes.OK).json({ length: recruiters.length, recruiters });
+};
+
+module.exports = { registerRecruiter, loginRecruiter, getAllRecruiters };

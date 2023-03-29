@@ -3,7 +3,7 @@ const User = require("./User");
 
 const StudentSchema = new mongoose.Schema({
   roll_no: {
-    type: Number,
+    type: String,
     require: true,
     required: [true, "Please provide a roll no."],
     minLength: 3,
@@ -30,6 +30,12 @@ const StudentSchema = new mongoose.Schema({
     type: String,
     enum: ["college", "recruiter", "student"],
     default: "student",
+  },
+  certificate_hash: {
+    type: String,
+  },
+  certificate_url: {
+    type: String,
   },
   // other student-specific fields
 });
