@@ -4,6 +4,7 @@ const User = require("./User");
 const StudentSchema = new mongoose.Schema({
   roll_no: {
     type: String,
+    unique: true,
     require: true,
     required: [true, "Please provide a roll no."],
     minLength: 3,

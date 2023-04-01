@@ -7,7 +7,7 @@ const checkPermissions = require("../utils/checkPermissions");
 const createTokenUser = require("../utils/createTokenUser");
 
 const getAllUsers = async (req, res) => {
-  const users = await User.find({ role: "user" }).select("-password");
+  const users = await User.find({}).select("-password");
 
   res.status(StatusCodes.OK).json({ users });
 };

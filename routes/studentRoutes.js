@@ -44,7 +44,7 @@ router
 
 router
   .route("/bulkImportStudents")
-  .get(
+  .post(
     authenticateUser,
     authorizeRoles("college"),
     uploadXlUsingMulter,

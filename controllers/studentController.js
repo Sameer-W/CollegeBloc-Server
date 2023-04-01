@@ -90,13 +90,20 @@ const bulkImportStudents = async (req, res) => {
   const sheet = workbook.Sheets[workbook.SheetNames];
   const data = xlsx.utils.sheet_to_json(sheet);
 
+  console.log(data);
   data.forEach((row) => {
     const student = new Student({
       name: row.name,
       email: row.email,
       password: row.password,
+      roll_no: row.roll_no,
+      year: row.year,
+      branch: row.branch,
+      division: row.division,
+      role: "student",
     });
 
+    console.log(student);
     student.save();
   });
 
