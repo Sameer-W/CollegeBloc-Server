@@ -24,11 +24,15 @@ const {
   getStudent,
   uploadCertificate,
   bulkImportStudents,
+  bulkUploadCertificates,
 } = require("../controllers/studentController");
 const {
   authenticateUser,
   authorizeRoles,
 } = require("../middleware/authentication");
+const {
+  getSingleStudentInterviewInvites,
+} = require("../controllers/interviewInviteController");
 
 router
   .route("/")
@@ -51,7 +55,24 @@ router
     bulkImportStudents
   );
 
+router
+  .route("/bulkUploadCertificates")
+  .post(
+    authenticateUser,
+    authorizeRoles("college"),
+    uploadXlUsingMulter,
+    bulkUploadCertificates
+  );
+
 router.route("/:id").get(authenticateUser, getStudent);
+
+router
+  .route("/:id/invites")
+  .get(
+    authenticateUser,
+    authorizeRoles("college", "student"),
+    getSingleStudentInterviewInvites
+  );
 
 router
   .route("/:id/uploadCertificate")

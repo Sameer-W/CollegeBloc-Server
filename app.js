@@ -20,6 +20,7 @@ const userRouter = require("./routes/userRoutes");
 const recruiterRouter = require("./routes/recruiterRoutes");
 const collegeRouter = require("./routes/collegeRoutes");
 const studentRouter = require("./routes/studentRoutes");
+const interViewInviteRouter = require("./routes/interviewInviteRoutes");
 
 //middleware
 const notFoundMiddleware = require("./middleware/not-found");
@@ -37,6 +38,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/recruiter", recruiterRouter);
 app.use("/api/v1/college", collegeRouter);
 app.use("/api/v1/students", studentRouter);
+app.use("/api/v1/interviewInvites", interViewInviteRouter);
 
 app.get("/", (req, res) => {
   res.send("hello world");

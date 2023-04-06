@@ -1,14 +1,14 @@
-const pinataApiKey = "7bd46972694ce9ac0ac0";
+const pinataApiKey = "b0bbb0a50748e181fb10";
 const pinataSecretApiKey =
-  "53cc95c27669c02d2d900ba4c3e49db6db3d5e1bffe68b124124b66f44c04bef";
+  "e2bad070444af44efda59d5f9cd9bb6185b467ff0cbbd2c00ba622c9e9d5ed69";
 const JWT =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxZDNlNDU4Yy00MzgwLTRjYTQtOTk3NS1lNjc5NTRmZWYwYWUiLCJlbWFpbCI6InNhbWVlci53QHNvbWFpeWEuZWR1IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siaWQiOiJGUkExIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9LHsiaWQiOiJOWUMxIiwiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjF9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6IjdiZDQ2OTcyNjk0Y2U5YWMwYWMwIiwic2NvcGVkS2V5U2VjcmV0IjoiNTNjYzk1YzI3NjY5YzAyZDJkOTAwYmE0YzNlNDlkYjZkYjNkNWUxYmZmZTY4YjEyNDEyNGI2NmY0NGMwNGJlZiIsImlhdCI6MTY4MDA3MzQzM30.FIUtk5z_WmvTeH0YHeA9afs7uM956MyRXoygkQsLL_g";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiIxMTYzOTg3NC05YmI5LTQ3MTktYTM1MC03NDNlNGIxOWM3NTEiLCJlbWFpbCI6ImZhcGF5OTQ4NTJAanRob3Zlbi5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGluX3BvbGljeSI6eyJyZWdpb25zIjpbeyJpZCI6IkZSQTEiLCJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MX0seyJpZCI6Ik5ZQzEiLCJkZXNpcmVkUmVwbGljYXRpb25Db3VudCI6MX1dLCJ2ZXJzaW9uIjoxfSwibWZhX2VuYWJsZWQiOmZhbHNlLCJzdGF0dXMiOiJBQ1RJVkUifSwiYXV0aGVudGljYXRpb25UeXBlIjoic2NvcGVkS2V5Iiwic2NvcGVkS2V5S2V5IjoiYjBiYmIwYTUwNzQ4ZTE4MWZiMTAiLCJzY29wZWRLZXlTZWNyZXQiOiJlMmJhZDA3MDQ0NGFmNDRlZmRhNTlkNWY5Y2Q5YmI2MTg1YjQ2N2ZmMGNiYmQyYzAwYmE2MjJjOWU5ZDVlZDY5IiwiaWF0IjoxNjgwNzY0NTc5fQ.m0ynYfghVoCxMLhAd8K9XyhCkQz0fmOkQWD-ficlSKM";
 
 const fs = require("fs");
 const axios = require("axios");
 const FormData = require("form-data");
 
-async function uploadToPinata(fileBuffer, fileName) {
+async function uploadBufferToPinata(fileBuffer, fileName) {
   const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
   const data = new FormData();
@@ -30,7 +30,28 @@ async function uploadToPinata(fileBuffer, fileName) {
   return response.data.IpfsHash;
 }
 
-module.exports = { uploadToPinata };
+async function uploadToPinata(src) {
+  const url = "https://api.pinata.cloud/pinning/pinFileToIPFS";
+
+  const formData = new FormData();
+
+  const file = fs.createReadStream(src);
+  formData.append("file", file);
+
+  const response = await axios.post(url, formData, {
+    maxContentLength: "Infinity",
+    headers: {
+      "Content-Type": `multipart/form-data`,
+      // pinata_api_key: pinataApiKey,
+      // pinata_secret_api_key: pinataSecretApiKey,
+      authorization: `Bearer ${JWT}`,
+    },
+  });
+
+  return response.data.IpfsHash;
+}
+
+module.exports = { uploadBufferToPinata, uploadToPinata };
 
 // module.exports = {
 //   host: "api.pinata.cloud/pinning/pinFileToIPFS",
