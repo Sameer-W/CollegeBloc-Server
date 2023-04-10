@@ -67,7 +67,7 @@ router
 router.route("/:id").get(authenticateUser, getStudent);
 
 router
-  .route("/:id/invites")
+  .route("/:studentId/invites")
   .get(
     authenticateUser,
     authorizeRoles("college", "student"),

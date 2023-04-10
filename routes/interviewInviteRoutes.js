@@ -10,6 +10,7 @@ const {
   deleteInterviewInvite,
   createInterviewInvite,
   getInterviewInvitesOfCurrentRecruiter,
+  updateInterviewStatus,
 } = require("../controllers/interviewInviteController");
 
 router
@@ -30,5 +31,9 @@ router
     getSingleInterviewInvite
   )
   .delete(authenticateUser, authorizeRoles("recruiter"), deleteInterviewInvite);
+
+router
+  .route("/:interviewInviteId/updateStatus")
+  .post(authenticateUser, authorizeRoles("student"), updateInterviewStatus);
 
 module.exports = router;

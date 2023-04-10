@@ -1,6 +1,8 @@
+const { StatusCodes } = require("http-status-codes");
 const { NotFoundError, BadRequestError } = require("../errors");
 const InterviewInvite = require("../models/InterviewInvite");
 const Student = require("../models/Student");
+const checkPermissions = require("../utils/checkPermissions");
 
 const createInterviewInvite = async (req, res) => {
   const { studentId } = req.body;
@@ -95,6 +97,27 @@ const getSingleStudentInterviewInvites = async (req, res) => {
     .json({ interviewInvites, count: interviewInvites.length });
 };
 
+const updateInterviewStatus = async (req, res) => {
+  const { interviewInviteId } = req.params;
+  const { status } = req.body;
+
+  const interviewInvite = await InterviewInvite.findOne({
+    id: interviewInviteId,
+  });
+
+  if (!interviewInvite) {
+    throw new NotFoundError("No interviewInvite found with the id");
+  }
+
+  checkPermissions(req.user, interviewInvite.studentId);
+
+  interviewInvite.status = status;
+
+  await interviewInvite.save();
+
+  res.status(StatusCodes.ACCEPTED).json(interviewInvite);
+};
+
 module.exports = {
   createInterviewInvite,
   getAllInterviewInvites,
@@ -102,4 +125,5 @@ module.exports = {
   getSingleInterviewInvite,
   deleteInterviewInvite,
   getSingleStudentInterviewInvites,
+  updateInterviewStatus,
 };

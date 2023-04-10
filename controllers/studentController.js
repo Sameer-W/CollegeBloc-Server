@@ -12,6 +12,8 @@ const checkPermissions = require("../utils/checkPermissions");
 
 const { spawn } = require("child_process");
 const path = require("path");
+const generatePassword = require("generate-password");
+const { sendGeneratedPassword } = require("../utils/sendResetPasswordEmail");
 
 const getAllStudents = async (req, res) => {
   const { name, roll_no, div, branch, year } = req.query;
@@ -92,11 +94,20 @@ const bulkImportStudents = async (req, res) => {
   const data = xlsx.utils.sheet_to_json(sheet);
 
   console.log(data);
-  data.forEach((row) => {
+
+  for (const row of data) {
+    const password = generatePassword.generate({
+      length: 8,
+      numbers: true,
+      symbols: true,
+      uppercase: true,
+      lowercase: true,
+    });
+
     const student = new Student({
       name: row.name,
       email: row.email,
-      password: row.password,
+      password: password,
       roll_no: row.roll_no,
       year: row.year,
       branch: row.branch,
@@ -104,11 +115,28 @@ const bulkImportStudents = async (req, res) => {
       role: "student",
     });
 
-    console.log(student);
-    student.save();
-  });
+    const passwordToken = crypto.randomBytes(32).toString("hex");
 
-  res.send("File uploaded and accounts created successfully!");
+    const origin = "http://localhost:3000";
+
+    await sendGeneratedPassword({
+      name: student.name,
+      email: student.email,
+      token: passwordToken,
+      origin,
+      currPassword: password,
+    });
+
+    const tenMin = 1000 * 60 * 10;
+
+    const passwordTokenExpirationDate = new Date(Date.now() + tenMin);
+
+    student.passwordToken = passwordToken;
+    student.passwordTokenExpirationDate = passwordTokenExpirationDate;
+    await student.save();
+  }
+
+  res.send("File uploaded, mails sent and accounts created successfully!");
 };
 
 const bulkUploadCertificates = async (req, res) => {
