@@ -1,18 +1,14 @@
 const { StatusCodes } = require("http-status-codes");
 const { token } = require("morgan");
 const { UnauthenticatedError, BadRequestError } = require("../errors");
-const Recruiter = require("../models/Recruiter");
+
 const Student = require("../models/Student");
 
 const { uploadBufferToPinata, uploadToPinata } = require("../utils/ipfsConfig");
 
 const xlsx = require("xlsx");
 
-const { createJWT, attachCookiesToResponse } = require("../utils");
 const checkPermissions = require("../utils/checkPermissions");
-const createTokenUser = require("../utils/createTokenUser");
-
-const pandas = require("node-pandas");
 
 const { spawn } = require("child_process");
 const path = require("path");
@@ -159,13 +155,42 @@ const bulkUploadCertificates = async (req, res) => {
         console.log(`child process exited with code ${code}`);
         const currFile = path.join(src, `${roll_no}_${name}.pdf`);
         const cid = await uploadToPinata(currFile);
-        await Student.findOneAndUpdate(
-          { roll_no: roll_no },
-          {
-            certificate_url: `https://ipfs.io/ipfs/${cid}`,
-            certificate_hash: `${cid}`,
-          }
-        );
+        let updatedStudent;
+        const existingSemester = await Student.findOne({
+          roll_no,
+          semesters: { $elemMatch: { sem } },
+        }).select("semesters");
+
+        if (existingSemester) {
+          updatedStudent = await Student.findOneAndUpdate(
+            { roll_no, "semesters.semester_number": sem },
+            {
+              $set: {
+                "semesters.$": {
+                  certificate_hash: `${cid}`,
+                  certificate_url: `https://ipfs.io/ipfs/${cid}`,
+                  semester_number: sem,
+                },
+              },
+            },
+            { new: true }
+          );
+        } else {
+          updatedStudent = await Student.findOneAndUpdate(
+            { roll_no },
+            {
+              $push: {
+                semesters: {
+                  certificate_hash: `${cid}`,
+                  certificate_url: `https://ipfs.io/ipfs/${cid}`,
+                  semester_number: sem,
+                },
+              },
+            },
+            { new: true }
+          );
+        }
+
         console.log(`Certificate uploaded for roll no ${roll_no}`);
         resolve();
       });

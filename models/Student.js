@@ -32,12 +32,14 @@ const StudentSchema = new mongoose.Schema({
     enum: ["college", "recruiter", "student"],
     default: "student",
   },
-  certificate_hash: {
-    type: String,
-  },
-  certificate_url: {
-    type: String,
-  },
+  semesters: [
+    {
+      certificate_hash: String,
+      certificate_url: String,
+      semester_number: Number,
+    },
+  ],
+
   // other student-specific fields
 });
 

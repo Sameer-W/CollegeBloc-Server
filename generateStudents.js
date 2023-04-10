@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const connectDB = require("./db/connect");
-const Student = require("./models/student");
+const Student = require("./models/Student");
 const dotenv = require("dotenv");
 
 dotenv.config();
