@@ -44,7 +44,7 @@ const getAllInterviewInvites = async (req, res) => {
 };
 
 const getInterviewInvitesOfCurrentRecruiter = async (req, res) => {
-  const { recruiterId } = req.user.userId;
+  const recruiterId = req.user.userId;
 
   const interviewInvites = await InterviewInvite.find({ recruiterId }).populate(
     { path: "studentId", select: "name roll_no branch" }

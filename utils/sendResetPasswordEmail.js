@@ -23,7 +23,7 @@ const sendGeneratedPassword = async ({
 }) => {
   const resetURL = `${origin}/user/reset-password?token=${token}&email=${email}`;
 
-  const html = `<p>Your account has been created on CollegeBloc with the password ${currPassword}. If you would like to reset the password, please click on the following link : <a href="${resetURL}">Reset Password</a></p>`;
+  const html = `<p>Your account has been created on CollegeBloc with the password <b>${currPassword}</b>. If you would like to reset the password, please click on the following link : <a href="${resetURL}">Reset Password</a></p>`;
 
   await sendEmail({
     to: email,

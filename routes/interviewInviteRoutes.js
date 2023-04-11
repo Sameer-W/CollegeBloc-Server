@@ -16,12 +16,15 @@ const {
 router
   .route("/")
   .get(authenticateUser, authorizeRoles("college"), getAllInterviewInvites)
+  .post(authenticateUser, authorizeRoles("recruiter"), createInterviewInvite);
+
+router
+  .route("/sentInvites")
   .get(
     authenticateUser,
     authorizeRoles("recruiter"),
     getInterviewInvitesOfCurrentRecruiter
-  )
-  .post(authenticateUser, authorizeRoles("recruiter"), createInterviewInvite);
+  );
 
 router
   .route("/:interviewInviteId")

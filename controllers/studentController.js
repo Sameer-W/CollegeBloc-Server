@@ -7,7 +7,7 @@ const Student = require("../models/Student");
 const { uploadBufferToPinata, uploadToPinata } = require("../utils/ipfsConfig");
 
 const xlsx = require("xlsx");
-
+const crypto = require("crypto");
 const checkPermissions = require("../utils/checkPermissions");
 
 const { spawn } = require("child_process");
@@ -96,10 +96,16 @@ const bulkImportStudents = async (req, res) => {
   console.log(data);
 
   for (const row of data) {
+    const tempStu = await Student.findOne({ email: row.email });
+
+    if (tempStu) {
+      continue;
+    }
+
     const password = generatePassword.generate({
       length: 8,
       numbers: true,
-      symbols: true,
+      symbols: false,
       uppercase: true,
       lowercase: true,
     });
