@@ -66,6 +66,11 @@ const myProfile = async (req, res) => {
 
 const uploadCertificate = async (req, res) => {
   const { id } = req.params;
+  const { sem } = req.body;
+
+  if (!sem) {
+    throw new BadRequestError("Please enter semester.");
+  }
 
   const fileBuffer = req.file.buffer;
   const fileName = req.file.originalname;
@@ -75,14 +80,20 @@ const uploadCertificate = async (req, res) => {
 
   const cid = await uploadBufferToPinata(fileBuffer, fileName);
 
-  const updatedStudent = await Student.findByIdAndUpdate(
-    { _id: id },
+  let updatedStudent = await Student.findOneAndUpdate(
+    { roll_no },
     {
-      certificate_url: `https://ipfs.io/ipfs/${cid}`,
-      certificate_hash: `${cid}`,
+      $push: {
+        semesters: {
+          certificate_hash: `${cid}`,
+          certificate_url: `https://ipfs.io/ipfs/${cid}`,
+          semester_number: parseInt(sem),
+        },
+      },
     },
     { new: true }
   ).select("-password");
+
   return res.json(updatedStudent);
 };
 
@@ -189,41 +200,41 @@ const bulkUploadCertificates = async (req, res) => {
         console.log(`child process exited with code ${code}`);
         const currFile = path.join(src, `${roll_no}_${name}.pdf`);
         const cid = await uploadToPinata(currFile);
-        let updatedStudent;
-        const existingSemester = await Student.findOne({
-          roll_no,
-          semesters: { $elemMatch: { sem } },
-        }).select("semesters");
+        // let updatedStudent;
+        // const existingSemester = await Student.findOne({
+        //   roll_no,
+        //   semesters: { $elemMatch: { sem } },
+        // }).select("semesters");
 
-        if (existingSemester) {
-          updatedStudent = await Student.findOneAndUpdate(
-            { roll_no, "semesters.semester_number": sem },
-            {
-              $set: {
-                "semesters.$": {
-                  certificate_hash: `${cid}`,
-                  certificate_url: `https://ipfs.io/ipfs/${cid}`,
-                  semester_number: sem,
-                },
+        // if (existingSemester) {
+        //   updatedStudent = await Student.findOneAndUpdate(
+        //     { roll_no, "semesters.semester_number": sem },
+        //     {
+        //       $set: {
+        //         "semesters.$": {
+        //           certificate_hash: `${cid}`,
+        //           certificate_url: `https://ipfs.io/ipfs/${cid}`,
+        //           semester_number: sem,
+        //         },
+        //       },
+        //     },
+        //     { new: true }
+        //   );
+        // } else {
+        let updatedStudent = await Student.findOneAndUpdate(
+          { roll_no },
+          {
+            $push: {
+              semesters: {
+                certificate_hash: `${cid}`,
+                certificate_url: `https://ipfs.io/ipfs/${cid}`,
+                semester_number: sem,
               },
             },
-            { new: true }
-          );
-        } else {
-          updatedStudent = await Student.findOneAndUpdate(
-            { roll_no },
-            {
-              $push: {
-                semesters: {
-                  certificate_hash: `${cid}`,
-                  certificate_url: `https://ipfs.io/ipfs/${cid}`,
-                  semester_number: sem,
-                },
-              },
-            },
-            { new: true }
-          );
-        }
+          },
+          { new: true }
+        );
+        //}
 
         console.log(`Certificate uploaded for roll no ${roll_no}`);
         resolve();
