@@ -8,6 +8,8 @@ dotenv.config();
 const start = async () => {
   await connectDB(process.env.MONGODB_URI);
 
+  await Student.find({}).deleteMany({});
+
   const years = ["FY", "SY", "TY", "LY"];
   const branches = ["COMPS", "EXTC", "IT", "MECH", "ETRX"];
   const divisions = ["A", "B", "C"];

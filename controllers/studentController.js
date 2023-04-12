@@ -81,7 +81,7 @@ const uploadCertificate = async (req, res) => {
   const cid = await uploadBufferToPinata(fileBuffer, fileName);
 
   let updatedStudent = await Student.findOneAndUpdate(
-    { roll_no },
+    { _id: id },
     {
       $push: {
         semesters: {
