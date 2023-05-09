@@ -12,6 +12,10 @@ const interviewInviteSchema = new mongoose.Schema(
       ref: "Recruiter",
       required: true,
     },
+    jobTitle: {
+      type: String,
+      required: true,
+    },
     jobDescription: {
       type: String,
       required: true,

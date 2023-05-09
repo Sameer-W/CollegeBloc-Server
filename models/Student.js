@@ -39,6 +39,9 @@ const StudentSchema = new mongoose.Schema({
       semester_number: Number,
     },
   ],
+  cv_url: {
+    type: String,
+  },
 
   // other student-specific fields
 });

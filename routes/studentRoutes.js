@@ -1,22 +1,11 @@
 const express = require("express");
 const router = express.Router();
 
-const multer = require("multer");
-
-const memoryStorage = multer.memoryStorage();
-const uploadCertificateUsingMulter = multer({ storage: memoryStorage }).single(
-  "certificate"
-);
-const diskStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-
-const uploadXlUsingMulter = multer({ storage: diskStorage }).single("file");
+const {
+  uploadCVUsingMulter,
+  uploadXlUsingMulter,
+  uploadCertificateUsingMulter,
+} = require("../utils/multerConfig");
 
 const {
   getAllStudents,
@@ -25,6 +14,7 @@ const {
   uploadCertificate,
   bulkImportStudents,
   bulkUploadCertificates,
+  uploadCV,
 } = require("../controllers/studentController");
 const {
   authenticateUser,
@@ -62,6 +52,15 @@ router
     authorizeRoles("college"),
     uploadXlUsingMulter,
     bulkUploadCertificates
+  );
+
+router
+  .route("/uploadCV")
+  .post(
+    authenticateUser,
+    authorizeRoles("student"),
+    uploadCVUsingMulter,
+    uploadCV
   );
 
 router.route("/:id").get(authenticateUser, getStudent);

@@ -14,6 +14,7 @@ const { spawn } = require("child_process");
 const path = require("path");
 const generatePassword = require("generate-password");
 const { sendGeneratedPassword } = require("../utils/sendResetPasswordEmail");
+const { uploadCVGetUrl } = require("../utils/cloudinaryConfig");
 
 const getAllStudents = async (req, res) => {
   const { name, roll_no, div, branch, year } = req.query;
@@ -91,6 +92,24 @@ const uploadCertificate = async (req, res) => {
         },
       },
     },
+    { new: true }
+  ).select("-password");
+
+  return res.json(updatedStudent);
+};
+
+const uploadCV = async (req, res) => {
+  const studentId = req.user.userId;
+
+  if (!req.file) {
+    throw new BadRequestError("Please input the CV file");
+  }
+
+  const cv_url = await uploadCVGetUrl(studentId, req.file);
+
+  let updatedStudent = await Student.findOneAndUpdate(
+    { _id: studentId },
+    { cv_url },
     { new: true }
   ).select("-password");
 
@@ -294,4 +313,5 @@ module.exports = {
   uploadCertificate,
   bulkImportStudents,
   bulkUploadCertificates,
+  uploadCV,
 };
