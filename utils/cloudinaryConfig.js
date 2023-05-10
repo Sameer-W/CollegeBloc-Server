@@ -8,17 +8,17 @@ cloudinary.config({
   api_secret: "7_bvUYCvIjGx_WiKWpGjYp6Kuo4",
 });
 
-async function uploadCVGetUrl(studentId, file) {
+async function uploadCVGetUrl(studentId, filePath) {
   try {
     const publicId = `${studentId}_CV`;
 
     // Upload the file to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(filePath, {
       public_id: publicId,
     });
 
     // Delete the file from disk storage
-    fs.unlink(file.path, (error) => {
+    fs.unlink(filePath, (error) => {
       if (error) {
         console.log(`Error deleting file: ${error}`);
       } else {

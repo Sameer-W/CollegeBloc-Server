@@ -15,6 +15,7 @@ const path = require("path");
 const generatePassword = require("generate-password");
 const { sendGeneratedPassword } = require("../utils/sendResetPasswordEmail");
 const { uploadCVGetUrl } = require("../utils/cloudinaryConfig");
+const pdf2img = require("pdf2img");
 
 const getAllStudents = async (req, res) => {
   const { name, roll_no, div, branch, year } = req.query;
@@ -101,11 +102,26 @@ const uploadCertificate = async (req, res) => {
 const uploadCV = async (req, res) => {
   const studentId = req.user.userId;
 
-  if (!req.file) {
-    throw new BadRequestError("Please input the CV file");
-  }
+  let imagePath;
+  // if (!req.file) {
+  //   throw new BadRequestError("Please input the CV file");
+  // }
 
-  const cv_url = await uploadCVGetUrl(studentId, req.file);
+  // if (req.file.mimetype === "application/pdf") {
+  //   pdf2img.convert(req.file.path, function (err, result) {
+  //     if (err) {
+  //       console.error(err);
+  //       return res.status(500).send("Failed to convert PDF to PNG");
+  //     }
+
+  //     // Upload the first PNG image to Cloudinary
+  //     imagePath = result.outputFiles[0];
+  //   });
+  // } else {
+  //   imagePath = req.file.path;
+  // }
+  imagePath = req.file.path;
+  const cv_url = await uploadCVGetUrl(studentId, imagePath);
 
   let updatedStudent = await Student.findOneAndUpdate(
     { _id: studentId },
@@ -199,7 +215,7 @@ const bulkUploadCertificates = async (req, res) => {
     }
 
     const pythonProcess = spawn("python", [
-      "./pyscript_certificate/scriptNew.py",
+      "./pyscript_certificate/scriptFinal.py",
     ]);
 
     await new Promise((resolve, reject) => {
