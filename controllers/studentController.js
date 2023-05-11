@@ -206,14 +206,35 @@ const bulkUploadCertificates = async (req, res) => {
     const roll_no = row["Roll No"];
     const name = row["Name"];
     const sem = row["Sem"];
-
+    const cxg = row["Total C X G"];
+    const credits = row["Total Credits"];
     const student = await Student.findOne({ roll_no });
-
+    let cgpa = row["SGPI"];
     if (!student) {
       rollDoesNotExist.push(roll_no);
       continue;
     }
 
+    const semesterIndex = student.semesters.findIndex(
+      (semester) => semester.semester_number === sem
+    );
+
+    if (semesterIndex !== -1) {
+      // If the semester object already exists, replace it with the new values
+      student.semesters.splice(semesterIndex, 1);
+    }
+
+    if (student.semesters.length !== 0) {
+      let totalCredits = credits;
+      let totalCreditPoints = cxg;
+      for (const semester of student.semesters) {
+        totalCredits += semester.credits;
+        totalCreditPoints += semester.cxg;
+      }
+
+      // Calculate the global CGPA
+      cgpa = totalCreditPoints / totalCredits;
+    }
     const pythonProcess = spawn("python", [
       "./pyscript_certificate/scriptFinal.py",
     ]);
@@ -233,43 +254,21 @@ const bulkUploadCertificates = async (req, res) => {
 
       pythonProcess.on("close", async (code) => {
         console.log(`child process exited with code ${code}`);
-        const currFile = path.join(src, `${roll_no}_${name}.pdf`);
+        const currFile = path.join(src, `${roll_no}_${name}_Sem${sem}.pdf`);
         const cid = await uploadToPinata(currFile);
-        // let updatedStudent;
-        // const existingSemester = await Student.findOne({
-        //   roll_no,
-        //   semesters: { $elemMatch: { sem } },
-        // }).select("semesters");
 
-        // if (existingSemester) {
-        //   updatedStudent = await Student.findOneAndUpdate(
-        //     { roll_no, "semesters.semester_number": sem },
-        //     {
-        //       $set: {
-        //         "semesters.$": {
-        //           certificate_hash: `${cid}`,
-        //           certificate_url: `https://ipfs.io/ipfs/${cid}`,
-        //           semester_number: sem,
-        //         },
-        //       },
-        //     },
-        //     { new: true }
-        //   );
-        // } else {
-        let updatedStudent = await Student.findOneAndUpdate(
-          { roll_no },
-          {
-            $push: {
-              semesters: {
-                certificate_hash: `${cid}`,
-                certificate_url: `https://ipfs.io/ipfs/${cid}`,
-                semester_number: sem,
-              },
-            },
-          },
-          { new: true }
-        );
-        //}
+        // If the semester object does not exist, add it to the semesters array
+        student.semesters.push({
+          certificate_hash: `${cid}`,
+          certificate_url: `https://ipfs.io/ipfs/${cid}`,
+          semester_number: sem,
+          cxg,
+          credits,
+        });
+
+        student.current_cgpa = cgpa.toFixed(2) || 0;
+
+        await student.save();
 
         console.log(`Certificate uploaded for roll no ${roll_no}`);
         resolve();
@@ -277,50 +276,11 @@ const bulkUploadCertificates = async (req, res) => {
     });
   }
 
-  res.send("Certificates generation and upload completed");
+  res.json({
+    msg: "Certificates generation and upload completed",
+    rollDoesNotExist,
+  });
 };
-
-// const bulkUploadCertificates = async (req, res) => {
-
-//   const workbook = xlsx.readFile(req.file.path);
-//   const sheet = workbook.Sheets[workbook.SheetNames];
-//   const rows = xlsx.utils.sheet_to_json(sheet);
-//   const rollDoesNotExist = [];
-
-//   rows.forEach(async (row) => {
-//     const roll_no = row["Roll No"];
-
-//     const student = await Student.findOne({ roll_no });
-
-//     if (!student) {
-//       rollDoesNotExist.push(roll_no);
-//       return;
-//     }
-
-//     // console.log(JSON.stringify({ ...row }));
-
-//     const pythonProcess = spawn("python", [
-//       "./pyscript_certificate/scriptNew.py",
-//     ]);
-
-//     pythonProcess.stdin.write(JSON.stringify({ ...row }));
-//     pythonProcess.stdin.end();
-
-//     pythonProcess.stdout.on("data", (data) => {
-//       console.log(`stdout: ${data}`);
-//     });
-
-//     pythonProcess.stderr.on("data", (data) => {
-//       console.error(`stderr: ${data}`);
-//     });
-
-//     pythonProcess.on("close", (code) => {
-//       console.log(`child process exited with code ${code}`);
-//     });
-//   });
-
-//   res.send("Certificates generation started");
-// };
 
 module.exports = {
   getAllStudents,

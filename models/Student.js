@@ -37,10 +37,15 @@ const StudentSchema = new mongoose.Schema({
       certificate_hash: String,
       certificate_url: String,
       semester_number: Number,
+      cxg: Number,
+      credits: Number,
     },
   ],
   cv_url: {
     type: String,
+  },
+  current_cgpa: {
+    type: Number,
   },
 
   // other student-specific fields
