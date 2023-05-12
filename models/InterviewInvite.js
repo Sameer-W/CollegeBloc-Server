@@ -31,7 +31,10 @@ const interviewInviteSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
+    salary: {
+      type: Number,
+      required: true,
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],

@@ -63,9 +63,7 @@ const getSingleInterviewInvite = async (req, res) => {
   });
 
   if (!interviewInvite) {
-    throw new CustomError.NotFoundError(
-      `No interview invite with id ${interviewInviteId}`
-    );
+    throw new NotFoundError(`No interview invite with id ${interviewInviteId}`);
   }
 
   res.status(StatusCodes.OK).json({ interviewInvite });
@@ -79,9 +77,7 @@ const deleteInterviewInvite = async (req, res) => {
   });
 
   if (!interviewInvite) {
-    throw new CustomError.NotFoundError(
-      `No interviewInvite with id ${interviewInviteId}`
-    );
+    throw new NotFoundError(`No interviewInvite with id ${interviewInviteId}`);
   }
 
   checkPermissions(req.user, interviewInvite.recruiterId);
