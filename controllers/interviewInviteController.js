@@ -101,7 +101,7 @@ const updateInterviewStatus = async (req, res) => {
   const { status } = req.body;
 
   const interviewInvite = await InterviewInvite.findOne({
-    id: interviewInviteId,
+    _id: interviewInviteId,
   });
 
   if (!interviewInvite) {

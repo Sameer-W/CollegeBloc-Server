@@ -11,11 +11,12 @@ cloudinary.config({
 async function uploadCVGetUrl(studentId, filePath) {
   try {
     const publicId = `${studentId}_CV`;
-
+    console.log("hi");
     // Upload the file to Cloudinary
     const result = await cloudinary.uploader.upload(filePath, {
       public_id: publicId,
     });
+    console.log("bye");
 
     // Delete the file from disk storage
     fs.unlink(filePath, (error) => {

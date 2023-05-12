@@ -1,6 +1,10 @@
 const { StatusCodes } = require("http-status-codes");
 const { token } = require("morgan");
-const { UnauthenticatedError, BadRequestError } = require("../errors");
+const {
+  UnauthenticatedError,
+  BadRequestError,
+  NotFoundError,
+} = require("../errors");
 
 const Student = require("../models/Student");
 
@@ -103,24 +107,25 @@ const uploadCV = async (req, res) => {
   const studentId = req.user.userId;
 
   let imagePath;
-  // if (!req.file) {
-  //   throw new BadRequestError("Please input the CV file");
-  // }
+  if (!req.file) {
+    throw new BadRequestError("Please input the CV file");
+  }
 
-  // if (req.file.mimetype === "application/pdf") {
-  //   pdf2img.convert(req.file.path, function (err, result) {
-  //     if (err) {
-  //       console.error(err);
-  //       return res.status(500).send("Failed to convert PDF to PNG");
-  //     }
+  if (req.file.mimetype === "application/pdf") {
+    pdf2img.convert(req.file.path, function (err, result) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Failed to convert PDF to PNG");
+      }
 
-  //     // Upload the first PNG image to Cloudinary
-  //     imagePath = result.outputFiles[0];
-  //   });
-  // } else {
-  //   imagePath = req.file.path;
-  // }
-  imagePath = req.file.path;
+      // Upload the first PNG image to Cloudinary
+      console.log(result.outputFiles);
+      imagePath = result.outputFiles[0];
+    });
+  } else {
+    imagePath = req.file.path;
+  }
+  // imagePath = req.file.path;
   const cv_url = await uploadCVGetUrl(studentId, imagePath);
 
   let updatedStudent = await Student.findOneAndUpdate(
