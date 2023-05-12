@@ -91,7 +91,10 @@ const deleteInterviewInvite = async (req, res) => {
 
 const getSingleStudentInterviewInvites = async (req, res) => {
   const { studentId } = req.params;
-  const interviewInvites = await InterviewInvite.find({ studentId });
+  const interviewInvites = await InterviewInvite.find({ studentId }).populate({
+    path: "recruiterId",
+    select: "name",
+  });
   res
     .status(StatusCodes.OK)
     .json({ interviewInvites, count: interviewInvites.length });
