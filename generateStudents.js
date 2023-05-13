@@ -17,7 +17,7 @@ const start = async () => {
   const generateRollNumbers = () => {
     const rolls = [];
 
-    for (let i = 0; i < 131; i++) {
+    for (let i = 65; i < 70; i++) {
       const roll = (1911001 + i).toString();
       rolls.push(roll);
     }
@@ -27,7 +27,7 @@ const start = async () => {
 
   const rolls = generateRollNumbers();
 
-  for (let i = 0; i < 131; i++) {
+  for (let i = 65; i < 70; i++) {
     const student = new Student({
       name: `Student ${i + 1}`,
       email: `student${i + 1}@example.com`,
